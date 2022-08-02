@@ -135,3 +135,18 @@ class Statistics(object):
         writer.add_scalar(prefix + "/lr", learning_rate, step)
         if patience is not None:
             writer.add_scalar(prefix + "/patience", patience, step)
+
+    def log_wandb(self, prefix, writer, learning_rate, patience, step):
+        t = self.elapsed_time()
+        log_data = {
+            prefix: {
+                "xent": self.xent(),
+                "ppl": self.ppl(),
+                "accuracy": self.accuracy(),
+                "tgtper": self.n_words / t,
+                "lr": learning_rate
+            }
+        }
+        if patience is not None:
+            log_data[prefix]["patience"] = patience
+        writer.log(log_data)

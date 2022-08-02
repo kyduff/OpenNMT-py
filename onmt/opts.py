@@ -46,6 +46,11 @@ def _add_logging_opts(parser, is_train=True):
                   type=str, default="runs/onmt",
                   help="Log directory for Tensorboard. "
                        "This is also the name of the run.")
+        group.add('--wandb', '-wandb', action='store_true',
+                  help='Use wandb for visualization during training. '
+                       'Must have the library wandb.')
+        group.add('--wandb_project', '-wandb_project', type=str, default="",
+                  help='Project for wandb.')
     else:
         # Options only during inference
         group.add('--attn_debug', '-attn_debug', action="store_true",

@@ -19,8 +19,18 @@ def build_report_manager(opt, gpu_rank):
     else:
         writer = None
 
+    if opt.wandb:
+        import wandb
+        project = opt.wandb_project if opt.wandb_project else None
+        config = {k: v for k, v in vars(opt).items() if not k.startswith('_')}
+        wandb.init(project=project, config=config)
+        wandb_writer = wandb
+    else:
+        wandb_writer = None
+
     report_mgr = ReportMgr(opt.report_every, start_time=-1,
-                           tensorboard_writer=writer)
+                           tensorboard_writer=writer,
+                           wandb_writer=wandb_writer)
     return report_mgr
 
 
@@ -102,7 +112,8 @@ class ReportMgrBase(object):
 
 
 class ReportMgr(ReportMgrBase):
-    def __init__(self, report_every, start_time=-1., tensorboard_writer=None):
+    def __init__(self, report_every, start_time=-1., tensorboard_writer=None,
+                 wandb_writer=None):
         """
         A report manager that writes statistics on standard output as well as
         (optionally) TensorBoard
@@ -114,12 +125,19 @@ class ReportMgr(ReportMgrBase):
         """
         super(ReportMgr, self).__init__(report_every, start_time)
         self.tensorboard_writer = tensorboard_writer
+        self.wandb_writer = wandb_writer
 
     def maybe_log_tensorboard(self, stats, prefix, learning_rate,
                               patience, step):
         if self.tensorboard_writer is not None:
             stats.log_tensorboard(
                 prefix, self.tensorboard_writer, learning_rate, patience, step)
+
+    def maybe_log_wandb(self, stats, prefix, learning_rate,
+                        patience, step):
+        if self.wandb_writer is not None:
+            stats.log_wandb(prefix, self.wandb_writer, learning_rate, patience,
+                            step)
 
     def _report_training(self, step, num_steps, learning_rate, patience,
                          report_stats):
@@ -130,6 +148,11 @@ class ReportMgr(ReportMgrBase):
                             learning_rate, self.start_time)
 
         self.maybe_log_tensorboard(report_stats,
+                                   "progress",
+                                   learning_rate,
+                                   patience,
+                                   step)
+        self.maybe_log_wandb(report_stats,
                                    "progress",
                                    learning_rate,
                                    patience,
@@ -153,12 +176,22 @@ class ReportMgr(ReportMgrBase):
                                        lr,
                                        patience,
                                        step)
+            self.maybe_log_wandb(train_stats,
+                                       "train",
+                                       lr,
+                                       patience,
+                                       step)
 
         if valid_stats is not None:
             self.log('Validation perplexity: %g' % valid_stats.ppl())
             self.log('Validation accuracy: %g' % valid_stats.accuracy())
 
             self.maybe_log_tensorboard(valid_stats,
+                                       "valid",
+                                       lr,
+                                       patience,
+                                       step)
+            self.maybe_log_wandb(valid_stats,
                                        "valid",
                                        lr,
                                        patience,
