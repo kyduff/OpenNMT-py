@@ -16,7 +16,7 @@ import onmt.utils
 from onmt.utils.logging import logger
 
 
-def build_trainer(opt, device_id, model, fields, optim, model_saver=None):
+def build_trainer(opt, device_id, model, fields, optim, model_saver=None, report_manager=None):
     """
     Simplify `Trainer` creation based on user `opt`s*
 
@@ -57,7 +57,7 @@ def build_trainer(opt, device_id, model, fields, optim, model_saver=None):
         opt.early_stopping, scorers=onmt.utils.scorers_from_opts(opt)) \
         if opt.early_stopping > 0 else None
 
-    report_manager = onmt.utils.build_report_manager(opt, gpu_rank)
+    report_manager = report_manager or onmt.utils.build_report_manager(opt, gpu_rank)
     trainer = onmt.Trainer(model, train_loss, valid_loss, optim, trunc_size,
                            shard_size, norm_method,
                            accum_count, accum_steps,

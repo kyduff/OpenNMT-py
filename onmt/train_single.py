@@ -57,7 +57,7 @@ def _build_train_iter(opt, fields, transforms_cls, stride=1, offset=0):
 
 
 def main(opt, fields, transforms_cls, checkpoint, device_id,
-         batch_queue=None, semaphore=None):
+         batch_queue=None, semaphore=None, report_manager=None):
     """Start training on `device_id`."""
     # NOTE: It's important that ``opt`` has been validated and updated
     # at this point.
@@ -77,7 +77,7 @@ def main(opt, fields, transforms_cls, checkpoint, device_id,
     model_saver = build_model_saver(model_opt, opt, model, fields, optim)
 
     trainer = build_trainer(
-        opt, device_id, model, fields, optim, model_saver=model_saver)
+        opt, device_id, model, fields, optim, model_saver=model_saver, report_manager=report_manager)
 
     if batch_queue is None:
         _train_iter = _build_train_iter(opt, fields, transforms_cls)

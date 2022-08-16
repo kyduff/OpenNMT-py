@@ -12,6 +12,7 @@ from onmt.utils.logging import init_logger, logger
 
 from onmt.models.model_saver import load_checkpoint
 from onmt.train_single import main as single_main, _build_train_iter
+from onmt.utils.report_manager import build_report_manager
 
 from onmt.utils.parse import ArgumentParser
 from onmt.opts import train_opts
@@ -103,12 +104,15 @@ def train(opt):
 
     set_random_seed(opt.seed, False)
 
+    report_manager = build_report_manager(opt, -1)
+
     checkpoint, fields, transforms_cls = _init_train(opt)
     train_process = partial(
         single_main,
         fields=fields,
         transforms_cls=transforms_cls,
-        checkpoint=checkpoint)
+        checkpoint=checkpoint,
+        report_manager=report_manager)
 
     nb_gpu = len(opt.gpu_ranks)
 

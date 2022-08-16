@@ -144,7 +144,8 @@ class Statistics(object):
                 "ppl": self.ppl(),
                 "accuracy": self.accuracy(),
                 "tgtper": self.n_words / t,
-                "lr": learning_rate
+                "lr": learning_rate,
+                "step": step,
             }
         }
         if patience is not None:

@@ -21,10 +21,11 @@ def build_report_manager(opt, gpu_rank):
 
     if opt.wandb:
         import wandb
-        project = opt.wandb_project if opt.wandb_project else None
+        wandb.require("service")
+        wandb.setup()
+        project = opt.wandb_project or None
         config = {k: v for k, v in vars(opt).items() if not k.startswith('_')}
-        wandb.init(project=project, config=config)
-        wandb_writer = wandb
+        wandb_writer = wandb.init(project=project, config=config)
     else:
         wandb_writer = None
 
