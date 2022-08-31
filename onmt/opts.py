@@ -616,6 +616,11 @@ def _add_train_general_opts(parser):
               help="Step for moving average. "
                    "Default is every update, "
                    "if -average_decay is set.")
+    group.add('--weight_decay', '-weight_decay', type=float, default=0.0,
+              help="Weight decay factor."
+                   "Approximately equivalent to L2 regularization penalty."
+                   "Only relevant to `sgd`,`adagrad`,`adadelta`,`adam`"
+                   "optimizers.")
 
     # learning rate
     group = parser.add_argument_group('Optimization- Rate')
